@@ -57,3 +57,65 @@ On Ubuntu distributions;
         $alsa -> play_nb();
     }
     $alsa -> flush();
+
+## METHODS
+
+### new()
+
+Instantiates a new Nick::Audio::LAME object.
+
+Arguments are interpreted as a hash and all are optional.
+
+- device
+
+    ALSA device name (e.g. hw:1,0)
+
+    Default: **default**
+
+- sample\_rate
+
+    Sample rate of PCM data in **buffer\_in**.
+
+    Default: **44100**
+
+- channels
+
+    Number of audio channels in PCM data in **buffer\_in**.
+
+    Default: **2**
+
+- buffer\_in
+
+    Scalar that'll be used to pull PCM data from.
+
+- blocking
+
+    Whether writing audio will block.
+
+    Default: **true**
+
+- buffer\_secs
+
+    How many seconds of audio ALSA should buffer.
+
+    Default: **0**
+
+### play()
+
+Sends PCM audio data from **buffer\_in** to ALSA.
+
+If **blocking** is set to false, it will be changed to true.
+
+### play\_nb()
+
+Sends PCM audio data from **buffer\_in** to ALSA.
+
+If **blocking** is set to true, it will be changed to false.
+
+### flush()
+
+Blocks while ALSA is drained of audio.
+
+### can\_write()
+
+Returns the number of bytes that can be written to ALSA.
