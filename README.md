@@ -58,7 +58,7 @@ On Ubuntu distributions;
     }
     $alsa -> flush();
 
-## METHODS
+## Methods
 
 ### new()
 
