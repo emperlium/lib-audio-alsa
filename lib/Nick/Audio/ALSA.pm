@@ -8,6 +8,19 @@ use Carp;
 
 our( $VERSION, %DEFAULTS );
 
+BEGIN {
+    $VERSION = '0.01';
+    XSLoader::load 'Nick::Audio::ALSA' => $VERSION;
+    %DEFAULTS = (
+        'sample_rate'   => 44100,
+        'channels'      => 2,
+        'device'        => 'default',
+        'buffer_in'     => do{ my $x = '' },
+        'blocking'      => 1,
+        'buffer_secs'   => 0
+    );
+}
+
 =pod
 
 =head1 NAME
@@ -124,19 +137,6 @@ Blocks while ALSA is drained of audio.
 Returns the number of bytes that can be written to ALSA.
 
 =cut
-
-BEGIN {
-    $VERSION = '0.01';
-    XSLoader::load 'Nick::Audio::ALSA' => $VERSION;
-    %DEFAULTS = (
-        'sample_rate'   => 44100,
-        'channels'      => 2,
-        'device'        => 'default',
-        'buffer_in'     => do{ my $x = '' },
-        'blocking'      => 1,
-        'buffer_secs'   => 0
-    );
-}
 
 sub new {
     my( $class, %settings ) = @_;
