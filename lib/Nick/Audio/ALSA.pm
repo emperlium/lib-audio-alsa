@@ -12,7 +12,7 @@ our( $VERSION, %DEFAULTS );
 
 =head1 NAME
 
-Nick::Audio::LAME - Interface to the libmp3lame (MP3 encoding) library.
+Nick::Audio::ALSA - Interface to the asound library.
 
 =head1 SYNOPSIS
 
@@ -61,7 +61,7 @@ Nick::Audio::LAME - Interface to the libmp3lame (MP3 encoding) library.
 
 =head2 new()
 
-Instantiates a new Nick::Audio::LAME object.
+Instantiates a new Nick::Audio::ALSA object.
 
 Arguments are interpreted as a hash and all are optional.
 

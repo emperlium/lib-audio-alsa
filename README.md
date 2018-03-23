@@ -62,7 +62,7 @@ On Ubuntu distributions;
 
 ### new()
 
-Instantiates a new Nick::Audio::LAME object.
+Instantiates a new Nick::Audio::ALSA object.
 
 Arguments are interpreted as a hash and all are optional.
 
