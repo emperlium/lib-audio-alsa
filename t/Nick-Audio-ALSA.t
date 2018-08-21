@@ -15,8 +15,8 @@ my $channels = 2;
 my $buff_in;
 my $alsa = Nick::Audio::ALSA -> new(
     'sample_rate'   => $sample_rate,
-    'device'        => 'default',
     'channels'      => $channels,
+    'device'        => $ENV{'NICK_ALSA_DEVICE'} || 'default',
     'buffer_in'     => \$buff_in,
     'blocking'      => 0,
     'buffer_secs'   => .5

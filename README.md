@@ -16,6 +16,10 @@ On Ubuntu distributions;
     make test
     sudo make install
 
+### Testing using ALSA device other than "default"
+
+    NICK_ALSA_DEVICE=hw:CustomPCM make test
+
 ## Example
 
     use Nick::Audio::ALSA;
