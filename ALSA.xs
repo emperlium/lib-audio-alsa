@@ -63,7 +63,7 @@ void write_audio( NICKAUDIOALSA *THIS ) {
     }
     if ( samples < 0 ) {
         croak(
-            "ALSA: write to audio interface failed to write %d samples: %s",
+            "ALSA: write to audio interface failed to write %lu samples: %s",
             len_in, snd_strerror( samples )
         );
     }
@@ -182,7 +182,7 @@ NICKAUDIOALSA::new_xs( device, sample_rate, channels, scalar_in, blocking, buffe
                 ) ) < 0
             ) {
                 croak(
-                    "ALSA: cannot set buffer size %d: %s",
+                    "ALSA: cannot set buffer size %lu: %s",
                     buffer_size, snd_strerror( err )
                 );
             }
