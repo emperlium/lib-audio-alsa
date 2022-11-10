@@ -33,6 +33,7 @@ On Ubuntu distributions;
     my $alsa = Nick::Audio::ALSA -> new(
         'sample_rate'   => $sample_rate,
         'channels'      => 1,
+        'bit_depth'     => 16,
         'device'        => 'default',
         'buffer_in'     => \$buff_in,
         'blocking'      => 0,
@@ -87,6 +88,14 @@ Arguments are interpreted as a hash and all are optional.
     Number of audio channels in PCM data in **buffer\_in**.
 
     Default: **2**
+
+- item bit_depth
+
+    Number of bits of information in each sample of PCM data in **buffer\_in**.
+
+    Valid values: 16 or 32.
+
+    Default: **16**
 
 - buffer\_in
 

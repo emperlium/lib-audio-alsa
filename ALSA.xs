@@ -10,6 +10,7 @@ struct nickaudioalsa {
     SV *scalar_in;
     snd_pcm_t *playback_handle;
     unsigned int channels;
+    unsigned int bytes_sample;
     bool blocking;
 };
 
@@ -47,7 +48,7 @@ void write_audio( NICKAUDIOALSA *THIS ) {
     )SvPV(
         THIS -> scalar_in, len_in
     );
-    len_in /= 2 * THIS -> channels;
+    len_in /= THIS -> bytes_sample;
     snd_pcm_sframes_t samples;
     samples = snd_pcm_writei(
         THIS -> playback_handle,
@@ -80,10 +81,11 @@ void write_audio( NICKAUDIOALSA *THIS ) {
 MODULE = Nick::Audio::ALSA  PACKAGE = Nick::Audio::ALSA
 
 static NICKAUDIOALSA *
-NICKAUDIOALSA::new_xs( device, sample_rate, channels, scalar_in, blocking, buffer_secs )
+NICKAUDIOALSA::new_xs( device, sample_rate, channels, bit_depth, scalar_in, blocking, buffer_secs )
         const char *device;
         unsigned int sample_rate;
         unsigned int channels;
+        unsigned int bit_depth;
         SV *scalar_in;
         bool blocking;
         float buffer_secs;
@@ -135,11 +137,24 @@ NICKAUDIOALSA::new_xs( device, sample_rate, channels, scalar_in, blocking, buffe
                 snd_strerror( err )
             );
         }
+        snd_pcm_format_t pcm_format;
+        switch( bit_depth ) {
+            case 16:
+                pcm_format = SND_PCM_FORMAT_S16_LE;
+                RETVAL -> bytes_sample = 2 * channels;
+                break;
+            case 32:
+                pcm_format = SND_PCM_FORMAT_S32_LE;
+                RETVAL -> bytes_sample = 4 * channels;
+                break;
+            default:
+                croak( "Unsupported bit depth: %d", bit_depth );
+        }
         if (
             ( err = snd_pcm_hw_params_set_format(
                 RETVAL -> playback_handle,
                 hw_params,
-                SND_PCM_FORMAT_S16_LE
+                pcm_format
             ) ) < 0
         ) {
             croak(

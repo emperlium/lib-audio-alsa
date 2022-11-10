@@ -14,6 +14,7 @@ BEGIN {
     %DEFAULTS = (
         'sample_rate'   => 44100,
         'channels'      => 2,
+        'bit_depth'     => 16,
         'device'        => 'default',
         'buffer_in'     => do{ my $x = '' },
         'blocking'      => 1,
@@ -40,6 +41,7 @@ Nick::Audio::ALSA - Interface to the asound library.
     my $alsa = Nick::Audio::ALSA -> new(
         'sample_rate'   => $sample_rate,
         'channels'      => 1,
+        'bit_depth'     => 16,
         'device'        => 'default',
         'buffer_in'     => \$buff_in,
         'blocking'      => 0,
@@ -98,6 +100,14 @@ Number of audio channels in PCM data in B<buffer_in>.
 
 Default: B<2>
 
+=item bit_depth
+
+Number of bits of information in each sample of PCM data in B<buffer_in>.
+
+Valid values: 16 or 32.
+
+Default: B<16>
+
 =item buffer_in
 
 Scalar that'll be used to pull PCM data from.
@@ -144,7 +154,7 @@ sub new {
         exists( $settings{$_} )
         ? $settings{$_}
         : $DEFAULTS{$_},
-        qw( device sample_rate channels buffer_in blocking buffer_secs )
+        qw( device sample_rate channels bit_depth buffer_in blocking buffer_secs )
     );
 }
 
