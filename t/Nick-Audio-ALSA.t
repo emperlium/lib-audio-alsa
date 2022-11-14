@@ -17,7 +17,7 @@ my $pack = 's';
 #my $pack = 'l';
 
 my $buff_in;
-my $alsa = Nick::Audio::ALSA -> new(
+my %set = (
     'sample_rate'   => $sample_rate,
     'channels'      => $channels,
     'bit_depth'     => $bit_depth,
@@ -26,6 +26,8 @@ my $alsa = Nick::Audio::ALSA -> new(
     'blocking'      => 0,
     'buffer_secs'   => .5
 );
+
+my $alsa = Nick::Audio::ALSA -> new( %set );
 
 ok( defined( $alsa ), 'new()' );
 
@@ -56,3 +58,10 @@ for ( $i = 0; $i < $steps; $i++ ) {
     $alsa -> play_nb();
 }
 $alsa -> flush();
+
+
+$set{'read_secs'} = .1;
+$alsa = Nick::Audio::ALSA -> new( %set );
+for ( my $i = 0; $i < 5; $i++ ) {
+    $alsa -> read();
+}

@@ -22,6 +22,8 @@ On Ubuntu distributions;
 
 ## Example
 
+Playing audio;
+
     use Nick::Audio::ALSA;
     use Time::HiRes 'sleep';
 
@@ -63,6 +65,38 @@ On Ubuntu distributions;
     }
     $alsa -> flush();
 
+Recording audio;
+
+    use Nick::Audio::ALSA;
+    use Nick::Audio::Wav::Write '$WAV_BUFFER';
+
+    my $sample_rate = 44100;
+    my $channels = 2;
+
+    my $buffer;
+    my $alsa = Nick::Audio::ALSA -> new(
+        'sample_rate'   => $sample_rate,
+        'channels'      => $channels,
+        'bit_depth'     => 16,
+        'buffer_in'     => \$WAV_BUFFER,
+        'read_secs'     => .1
+    );
+
+    my $wav = Nick::Audio::Wav::Write -> new(
+        '/tmp/test.wav',
+        'channels' => $channels,
+        'sample_rate' => $sample_rate,
+        'bits_sample' => 16
+    );
+
+    my $i = 0;
+    while ( $i++ < 100  ) {
+        $alsa -> read();
+        $wav -> write();
+    }
+    $wav -> close();
+
+
 ## Methods
 
 ### new()
@@ -99,7 +133,7 @@ Arguments are interpreted as a hash and all are optional.
 
 - buffer\_in
 
-    Scalar that'll be used to pull PCM data from.
+    Scalar that'll be used to pull/ push PCM data from/ to.
 
 - blocking
 
@@ -112,6 +146,12 @@ Arguments are interpreted as a hash and all are optional.
     How many seconds of audio ALSA should buffer.
 
     Default: **0**
+
+- read\_secs
+
+    Greater than 0 if we'll be recording audio, and how many seconds of audio is read each time **read()** is called.
+
+    Default: **unset**
 
 ### play()
 
@@ -132,3 +172,7 @@ Blocks while ALSA is drained of audio.
 ### can\_write()
 
 Returns the number of bytes that can be written to ALSA.
+
+### read()
+
+Reads **read\_secs** seconds of PCM audio data from ALSA into **buffer\_in**.

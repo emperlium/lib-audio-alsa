@@ -81,7 +81,7 @@ void write_audio( NICKAUDIOALSA *THIS ) {
 MODULE = Nick::Audio::ALSA  PACKAGE = Nick::Audio::ALSA
 
 static NICKAUDIOALSA *
-NICKAUDIOALSA::new_xs( device, sample_rate, channels, bit_depth, scalar_in, blocking, buffer_secs )
+NICKAUDIOALSA::new_xs( device, sample_rate, channels, bit_depth, scalar_in, blocking, buffer_secs, record )
         const char *device;
         unsigned int sample_rate;
         unsigned int channels;
@@ -89,6 +89,7 @@ NICKAUDIOALSA::new_xs( device, sample_rate, channels, bit_depth, scalar_in, bloc
         SV *scalar_in;
         bool blocking;
         float buffer_secs;
+        bool record;
     CODE:
         Newxz( RETVAL, 1, NICKAUDIOALSA );
         int err;
@@ -96,7 +97,7 @@ NICKAUDIOALSA::new_xs( device, sample_rate, channels, bit_depth, scalar_in, bloc
             ( err = snd_pcm_open(
                 &( RETVAL -> playback_handle ),
                 device,
-                SND_PCM_STREAM_PLAYBACK,
+                record ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
                 blocking ? 0 : SND_PCM_ASYNC
             ) ) < 0
         ) {
@@ -286,3 +287,37 @@ NICKAUDIOALSA::can_write()
         RETVAL *= 2 * THIS -> channels;
     OUTPUT:
         RETVAL
+
+void
+NICKAUDIOALSA::read()
+    CODE:
+        STRLEN len_in;
+        short int *in_buff = (short int*)SvPV( THIS -> scalar_in, len_in );
+        len_in /= THIS -> bytes_sample;
+        snd_pcm_sframes_t samples;
+        samples = snd_pcm_readi(
+            THIS -> playback_handle,
+            in_buff,
+            ( snd_pcm_sframes_t )len_in
+        );
+        if ( samples < 0 ) {
+            samples = snd_pcm_recover(
+                THIS -> playback_handle,
+                samples,
+                0
+            );
+        }
+        if ( samples < 0 ) {
+            croak(
+                "ALSA: read from audio interface failed to write %lu samples: %s",
+                len_in, snd_strerror( samples )
+            );
+        }
+        if (
+             samples != ( snd_pcm_sframes_t )len_in
+        ) {
+            warn(
+                "ALSA: wanted to read %li samples, but read %li",
+                len_in, samples
+            );
+        }

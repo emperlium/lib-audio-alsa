@@ -30,6 +30,8 @@ Nick::Audio::ALSA - Interface to the asound library.
 
 =head1 SYNOPSIS
 
+Playing audio;
+
     use Nick::Audio::ALSA;
     use Time::HiRes 'sleep';
 
@@ -71,6 +73,35 @@ Nick::Audio::ALSA - Interface to the asound library.
     }
     $alsa -> flush();
 
+Recording audio;
+
+    use Nick::Audio::ALSA;
+    use Nick::Audio::Wav::Write '$WAV_BUFFER';
+
+    my $sample_rate = 44100;
+    my $channels = 2;
+
+    my $buffer;
+    my $alsa = Nick::Audio::ALSA -> new(
+        'sample_rate'   => $sample_rate,
+        'channels'      => $channels,
+        'buffer_in'     => \$WAV_BUFFER,
+        'read_secs'     => .1
+    );
+
+    my $wav = Nick::Audio::Wav::Write -> new(
+        '/tmp/test.wav',
+        'channels' => $channels,
+        'sample_rate' => $sample_rate,
+        'bits_sample' => 16
+    );
+
+    my $i = 0;
+    while ( $i++ < 100  ) {
+        $alsa -> read();
+        $wav -> write();
+    }
+    $wav -> close();
 
 =head1 METHODS
 
@@ -110,7 +141,7 @@ Default: B<16>
 
 =item buffer_in
 
-Scalar that'll be used to pull PCM data from.
+Scalar that'll be used to pull/ push PCM data from/ to.
 
 =item blocking
 
@@ -123,6 +154,12 @@ Default: B<true>
 How many seconds of audio ALSA should buffer.
 
 Default: B<0>
+
+=item read_secs
+
+Greater than 0 if we'll be recording audio, and how many seconds of audio is read each time B<read()> is called.
+
+Default: B<unset>
 
 =back
 
@@ -146,16 +183,39 @@ Blocks while ALSA is drained of audio.
 
 Returns the number of bytes that can be written to ALSA.
 
+=head2 read()
+
+Reads B<read_secs> seconds of PCM audio data from ALSA into B<buffer_in>.
+
+Blocks until audio is retrieved.
+
 =cut
 
 sub new {
     my( $class, %settings ) = @_;
-    return Nick::Audio::ALSA -> new_xs( map
+    my @set = map(
         exists( $settings{$_} )
         ? $settings{$_}
         : $DEFAULTS{$_},
-        qw( device sample_rate channels bit_depth buffer_in blocking buffer_secs )
+        qw(
+            device sample_rate channels bit_depth buffer_in blocking
+            buffer_secs
+        )
     );
+    if (
+        exists( $settings{'read_secs'} )
+        && $settings{'read_secs'} > 0
+    ) {
+        my $bytes = $settings{'read_secs'}
+                    * $settings{'sample_rate'}
+                    * $settings{'channels'}
+                    * 2;
+        ${ $settings{'buffer_in'} } = pack 'c' . $bytes, 0;
+        push @set => 1;
+    } else {
+        push @set => 0;
+    }
+    return Nick::Audio::ALSA -> new_xs(  @set );
 }
 
 1;
